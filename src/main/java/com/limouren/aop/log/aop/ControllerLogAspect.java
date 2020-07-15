@@ -8,6 +8,8 @@ import org.aspectj.lang.annotation.*;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -87,26 +89,15 @@ public class ControllerLogAspect {
             if(msgLog != null) {
                 // 响应时间
                 msgLog.setRspTime(new Date());
-                if(result != null) {
-                    Map<String, Object> r = JSON.parseObject(JSON.toJSON(result).toString());
-                    if(r.get("result") != null) {
-                        // 响应状态 成功/失败
-                        if((boolean) r.get("result")) {
-                            msgLog.setRspStatus("成功");
-                        } else {
-                            msgLog.setRspStatus("失败");
-                            // 错误响应码、错误响应信息
-                            if(r.get("body") != null) {
-                                Map<String, String> b = (Map<String, String>) r.get("body");
-                                if(b.containsKey("code"))
-                                    msgLog.setErrCode(b.get("code"));
-                                if(b.containsKey("content"))
-                                    msgLog.setErrMsg(b.get("content"));
-                            }
-                        }
+                if(result != null && result instanceof ResponseEntity) {
+                    if(HttpStatus.OK.equals(((ResponseEntity) result).getStatusCode())) {
+                        msgLog.setRspStatus("成功");
+                    } else {
+                        msgLog.setRspStatus("失败");
                     }
+                    msgLog.setErrCode(((ResponseEntity) result).getStatusCode().value());
                     // 响应内容
-                    rspmsg = JSON.toJSON(result).toString();
+                    rspmsg = JSON.toJSON(((ResponseEntity) result).getBody()).toString();
                     msgLog.setRspMsg(rspmsg);
                 }
                 // 耗时

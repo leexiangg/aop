@@ -40,7 +40,7 @@ public class MsgLog {
     /** 响应状态 成功/失败 */
     private String rspStatus;
     /** 错误响应码 */
-    private String errCode;
+    private Integer errCode;
     /** 错误响应信息 */
     private String errMsg;
     /** 响应时间 */
@@ -194,11 +194,11 @@ public class MsgLog {
     /**
      * @return 错误响应码
      */
-    public String getErrCode() {
+    public Integer getErrCode() {
         return errCode;
     }
 
-    public void setErrCode(String errCode) {
+    public void setErrCode(Integer errCode) {
         this.errCode = errCode;
     }
     /**
